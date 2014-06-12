@@ -1,4 +1,5 @@
 import os
+import urllib, urllib2
 
 def walk_hands():
     input_folder = "C:/swc_client-Windows v0.2.18/handhistories"
@@ -30,7 +31,15 @@ def walk_hands():
         f.close()
 
 def process_hand(hand_lines):
-    print "\n".join(hand_lines)
+    url = "http://www.bitcoinpokerblog.com/handconverter/converthand.php"
+    headers = {
+        "User-Agent" : "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0"
+    }
+    data = dict(ConversionRate=1, handhistory="\r\n".join(hand_lines))
+    request = urllib2.Request(url, headers=headers, data=urllib.urlencode(data))
+    response = urllib2.urlopen(request)
+    print response.read()
+
 
 
 def main():
