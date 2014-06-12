@@ -23,14 +23,14 @@ def walk_hands():
             while len(line) > 0:
                 hand_lines.append(line)
                 line = f.readline().strip()
-            process_hand(hand_lines)
+            process_hand_bpb(hand_lines)
             # skip two empty lines
             f.readline()
             f.readline()
             count += 1
         f.close()
 
-def process_hand(hand_lines):
+def process_hand_bpb(hand_lines):
     url = "http://www.bitcoinpokerblog.com/handconverter/converthand.php"
     headers = {
         "User-Agent" : "Mozilla/5.0 (Windows NT 5.1; rv:31.0) Gecko/20100101 Firefox/31.0"
