@@ -1,9 +1,12 @@
-import os
+import os, time
+from difflib import Differ
 from HandHistory import HandHistory
 from NetworkConverter import NetworkConverter
 
-def walk_hands():
-    input_folder = "C:/swc_client-Windows v0.2.18/handhistories"
+def walk_hands(input_folder, output_folder, batch_count):
+    '''
+    This method walks all the hands in the directory and converts them
+    '''
 
     files = []
     for (dirpath, dirnames, filenames) in os.walk(input_folder):
@@ -13,33 +16,60 @@ def walk_hands():
 
     count = 0
     for filename in files:
-        f = open(input_folder + "/" + filename)
+        part = 0
+        full_path = input_folder + "/" + filename
+        (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(full_path)
+        #print "%s\nlast modified: %s\nsize: %s bytes\n\n" % (filename, time.ctime(mtime), size)
+        f = open(full_path)
+        hand_lines = []
         while True:
-            hand_lines = []
             line = f.readline().strip()
             if len(line) == 0:
-                break
-            if count > 10:
                 break
             while len(line) > 0:
                 hand_lines.append(line)
                 line = f.readline().strip()
-            process_hand(hand_lines)
+            if batch_count is not None:
+                if count < batch_count:
+                    hand_lines.extend(["", "", ""]) # adding some empty lines
+                else:
+                    process_hand(hand_lines, output_folder, filename, part)
+                    hand_lines = []
+                    part += 1
+                    time.sleep(5)
+            else:
+                process_hand(hand_lines, output_folder, filename, part)
+                hand_lines = []
+                part += 1
+                time.sleep(2)
             # skip two empty lines
             f.readline()
             f.readline()
             count += 1
         f.close()
 
-def process_hand(hand_lines):
+def monitor_hand(input_folder, start_time):
+    pass
+
+def process_hand(hand_lines, output_folder, filename, part):
     # print "\r\n".join(hand_lines)
     # print "\n"
-    # nc = NetworkConverter(hand_lines)
-    # print nc.processHandHistory()
-    hh = HandHistory(hand_lines)
+    nc = NetworkConverter(hand_lines)
+    fout_path = output_folder + "/" + filename + " - " + str(part) + ".txt"
+    fout = open(fout_path, "w")
+    fout.write(nc.processHandHistory())
+    fout.close()
+    print fout_path + " written"
+    # hh = HandHistory(hand_lines)
+    pass
 
 def main():
-    walk_hands()
+    input_folder = "C:/swc_client-Windows v0.2.18/handhistories"
+    output_folder = "C:/swc_client-Windows v0.2.18/converted_handhistories"
+    start_time = time.time()
+
+    # monitor_hand(input_folder, start_time)
+    walk_hands(input_folder, output_folder, 30)
 
 if __name__ == "__main__":
     main()
