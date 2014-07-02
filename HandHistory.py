@@ -142,6 +142,12 @@ class HandHistory:
         if i < len(lines):
             self.turn = self.getCommunityCards(lines[i])
             self.getTurnActions(lines[i+1:])
+        else:
+            self.turn = None
+            self.turnActions = []
+            self.river = None
+            self.riverActions = []
+            self.getShowdown(lines[i:])
 
     def getTurnActions(self, lines):
         self.turnActions = []
@@ -156,6 +162,10 @@ class HandHistory:
         if i < len(lines):
             self.river = self.getCommunityCards(lines[i])
             self.getRiverActions(lines[i+1:])
+        else:
+            self.river = None
+            self.riverActions = []
+            self.getShowdown(lines[i:])
 
     def getRiverActions(self, lines):
         self.riverActions = []
@@ -168,16 +178,19 @@ class HandHistory:
                 i += 1
 
         if i < len(lines):
-            self.getShowdown(lines[i+1:])
+            self.getShowdown(lines[i:])
 
     def getShowdown(self, lines):
-        print self.holeCards
-        print self.preflopActions
-        print self.flop
-        print self.flopActions
-        print self.turn
-        print self.turnActions
-        print self.river
-        print self.riverActions
+        # when lines has 0 length, that means there is no showdown
+        if len(lines) > 0:
+            print lines
+        # print self.holeCards
+        # print self.preflopActions
+        # print self.flop
+        # print self.flopActions
+        # print self.turn
+        # print self.turnActions
+        # print self.river
+        # print self.riverActions
         print
         pass

@@ -32,7 +32,7 @@ def walk_hands():
         f.close()
 
 def process_hand(hand_lines):
-    print "\r\n".join(hand_lines)
+    # print "\r\n".join(hand_lines)
     # print "\n"
     # nc = NetworkConverter(hand_lines)
     # print nc.processHandHistory()
