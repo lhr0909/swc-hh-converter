@@ -18,15 +18,13 @@ def walk_hands(input_folder, output_folder, processed_folder, batch_count):
     for filename in files:
         part = 0
         full_path = input_folder + "/" + filename
-        (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(full_path)
-        #print "%s\nlast modified: %s\nsize: %s bytes\n\n" % (filename, time.ctime(mtime), size)
         f = open(full_path)
         hand_lines = []
         while True:
             line = f.readline().strip()
             if len(line) == 0:
                 if len(hand_lines) > 0:
-                    process_hand(hand_lines, output_folder, filename, part)
+                    process_hand(hand_lines, output_folder, filename, part, "w")
                     hand_lines = []
                     part += 1
                     time.sleep(5)
@@ -38,13 +36,13 @@ def walk_hands(input_folder, output_folder, processed_folder, batch_count):
                 if count < batch_count:
                     hand_lines.extend(["", "", ""]) # adding some empty lines
                 else:
-                    process_hand(hand_lines, output_folder, filename, part)
+                    process_hand(hand_lines, output_folder, filename, part, "w")
                     hand_lines = []
                     part += 1
                     count = 0
                     time.sleep(5)
             else:
-                process_hand(hand_lines, output_folder, filename, part)
+                process_hand(hand_lines, output_folder, filename, part, "w")
                 hand_lines = []
                 part += 1
                 time.sleep(2)
@@ -55,15 +53,47 @@ def walk_hands(input_folder, output_folder, processed_folder, batch_count):
         f.close()
         os.rename(full_path, processed_folder + "/" + filename)
 
-def monitor_hand(input_folder, start_time):
+def monitor_hand(input_folder, output_folder, start_time, timeout):
+    tracking_files = set()
+    file_lines = dict()
+    while True:
+        for (dirpath, dirnames, filenames) in os.walk(input_folder):
+            # TODO: wanna recursively get into directories?
+            for filename in filenames:
+                full_path = input_folder + "/" + filename
+                (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(full_path)
+                if mtime > start_time:
+                    # add new hand files into our tracking files
+                    tracking_files.add(filename)
+                    print "added %s to track" % filename
+            # find diff and convert them
+            for filename in tracking_files:
+                full_path = input_folder + "/" + filename
+                f = open(full_path, "r")
+                lines = f.readlines()
+                start_line = 0
+                if filename not in file_lines:
+                    file_lines[filename] = len(lines)
+                else:
+                    start_line = file_lines[filename]
+                new_lines = map(lambda x: x.strip(), lines[start_line:])
+                process_hand(new_lines, output_folder, filename, None, "a")
+            break
+        tracking_files = set()
+        start_time = time.time()
+        time.sleep(timeout)
     pass
 
-def process_hand(hand_lines, output_folder, filename, part):
+def process_hand(hand_lines, output_folder, filename, part, file_mode):
     # print "\r\n".join(hand_lines)
     # print "\n"
     nc = NetworkConverter(hand_lines)
-    fout_path = output_folder + "/" + filename + " - " + str(part) + ".txt"
-    fout = open(fout_path, "w")
+    fout_path = ""
+    if part is not None:
+        fout_path = output_folder + "/" + filename + " - " + str(part) + ".txt"
+    else:
+        fout_path = output_folder + "/" + filename
+    fout = open(fout_path, file_mode)
     fout.write(nc.processHandHistory())
     fout.close()
     print fout_path + " written"
@@ -76,8 +106,8 @@ def main():
     processed_folder = "C:/swc_client-Windows v0.2.18/processed_handhistories"
     start_time = time.time()
 
-    # monitor_hand(input_folder, start_time)
-    walk_hands(input_folder, output_folder, processed_folder, 30)
+    monitor_hand(input_folder, output_folder, start_time, 5)
+    # walk_hands(input_folder, output_folder, processed_folder, 30)
 
 if __name__ == "__main__":
     main()
