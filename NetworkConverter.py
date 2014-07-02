@@ -1,4 +1,4 @@
-import urllib, urllib2
+import urllib, urllib2, time
 
 class NetworkConverter:
     """
@@ -16,7 +16,15 @@ class NetworkConverter:
         }
         data = dict(ConversionRate=1, handhistory="\r\n".join(self.lines))
         request = urllib2.Request(url, headers=headers, data=urllib.urlencode(data))
-        response = urllib2.urlopen(request)
+        trying = True
+        while trying:
+            try:
+                response = urllib2.urlopen(request)
+                trying = False
+            except:
+                print "error occured, retrying.."
+                time.sleep(5)
+                trying = True
 
         # take out header before returning
         return "\r\n".join(response.read().split("\r\n")[6:])

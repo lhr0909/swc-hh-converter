@@ -3,7 +3,7 @@ from difflib import Differ
 from HandHistory import HandHistory
 from NetworkConverter import NetworkConverter
 
-def walk_hands(input_folder, output_folder, batch_count):
+def walk_hands(input_folder, output_folder, processed_folder, batch_count):
     '''
     This method walks all the hands in the directory and converts them
     '''
@@ -25,6 +25,11 @@ def walk_hands(input_folder, output_folder, batch_count):
         while True:
             line = f.readline().strip()
             if len(line) == 0:
+                if len(hand_lines) > 0:
+                    process_hand(hand_lines, output_folder, filename, part)
+                    hand_lines = []
+                    part += 1
+                    time.sleep(5)
                 break
             while len(line) > 0:
                 hand_lines.append(line)
@@ -48,6 +53,7 @@ def walk_hands(input_folder, output_folder, batch_count):
             f.readline()
             count += 1
         f.close()
+        os.rename(full_path, processed_folder + "/" + filename)
 
 def monitor_hand(input_folder, start_time):
     pass
@@ -67,10 +73,11 @@ def process_hand(hand_lines, output_folder, filename, part):
 def main():
     input_folder = "C:/swc_client-Windows v0.2.18/handhistories"
     output_folder = "C:/swc_client-Windows v0.2.18/converted_handhistories"
+    processed_folder = "C:/swc_client-Windows v0.2.18/processed_handhistories"
     start_time = time.time()
 
     # monitor_hand(input_folder, start_time)
-    walk_hands(input_folder, output_folder, 30)
+    walk_hands(input_folder, output_folder, processed_folder, 30)
 
 if __name__ == "__main__":
     main()
