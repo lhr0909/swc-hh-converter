@@ -36,6 +36,7 @@ def walk_hands(input_folder, output_folder, batch_count):
                     process_hand(hand_lines, output_folder, filename, part)
                     hand_lines = []
                     part += 1
+                    count = 0
                     time.sleep(5)
             else:
                 process_hand(hand_lines, output_folder, filename, part)
