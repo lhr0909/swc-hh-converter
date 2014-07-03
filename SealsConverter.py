@@ -73,10 +73,13 @@ def monitor_hand(input_folder, output_folder, start_time, timeout):
                 lines = f.readlines()
                 start_line = 0
                 if filename not in file_lines:
-                    file_lines[filename] = len(lines)
+                    start_line = 0
                 else:
                     start_line = file_lines[filename]
                 new_lines = map(lambda x: x.strip(), lines[start_line:])
+                print "\n".join(new_lines)
+                # update line count here
+                file_lines[filename] = len(lines)
                 process_hand(new_lines, output_folder, filename, None, "a")
             break
         tracking_files = set()
