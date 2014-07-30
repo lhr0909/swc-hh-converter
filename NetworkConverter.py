@@ -8,7 +8,7 @@ class NetworkConverter:
 
     def __init__(self, hand_lines):
         self.lines = hand_lines
-        if not self.fuckHaxCheck():
+        if not self.haxCheck():
             self.lines = []
 
     def haxCheck(self):
