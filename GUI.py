@@ -2,51 +2,82 @@ from Tkinter import *
 import tkFileDialog
 import tkMessageBox
 
-
+from threading import Thread
+from Queue import Queue
+from SealsConverter import monitor_hand
+import time, os
 
 class View(object):
 
     def __init__(self, master):
-        """Construct the interface"""
+        # GUI creation
         self._master = master
-        master.title('Seals with Clubs Hand History Converter')
-        master.minsize(width=450, height=100)
+        master.title('Seals with Clubs Hand History Converter built for lhr0909')
+        master.minsize(width=450, height=80)
         master.resizable(0, 0)
 
-        self.label1 = Label(master, text='Input Folder')
-        self.label1.grid(row=0)
-        self.label2 = Label(master, text='Processed Folder')
-        self.label2.grid(row=1)
+        self.inputFolderLabel = Label(master, text='Input Folder')
+        self.inputFolderLabel.grid(row=0)
+        self.processedFolderLabel = Label(master, text='Processed Folder')
+        self.processedFolderLabel.grid(row=1)
 
-        self.entry1 = Entry(master)
-        self.entry1.grid(row=0, column=1, padx=20, ipadx=50)
-        self.entry2 = Entry(master)
-        self.entry2.grid(row=1, column=1, padx=20, ipadx=50)
+        self.inputFolderEntry = Entry(master)
+        self.inputFolderEntry.grid(row=0, column=1, padx=20, ipadx=50)
+        self.processedFolderEntry = Entry(master)
+        self.processedFolderEntry.grid(row=1, column=1, padx=20, ipadx=50)
         
-        self.b = Button(master, text='Start/Stop', command=self.startpressed)
-        self.b.grid(row=1, column=3, padx=20, ipadx=30, ipady=5)
+        self.startButton = Button(master, text='Start', command=self.start_pressed)
+        self.startButton.grid(row=1, column=3, padx=20, ipadx=30, ipady=5)
 
-        self.ib = Button(master, text='Browse', command=self.browse1)
-        self.ib.grid(row=0, column=2, pady=5)
-        self.pb = Button(master, text='Browse', command=self.browse2)
-        self.pb.grid(row=1, column=2, pady=5, )
+        self.inputFolderBrowseButton = Button(master, text='Browse', command=self.browse_input_folder)
+        self.inputFolderBrowseButton.grid(row=0, column=2, pady=5)
+        self.processedFolderBrowseButton = Button(master, text='Browse', command=self.browse_processed_folder)
+        self.processedFolderBrowseButton.grid(row=1, column=2, pady=5, )
 
-        self._filename = ''
+        # Initialization of various variables
+        self.inputFolderPath = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/") + "/handhistories"
+        self.processedFolderPath = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/") + "/processed_handhistories"
+        self.inputFolderEntry.delete(0, END)
+        self.inputFolderEntry.insert(0, self.inputFolderPath)
+        self.processedFolderEntry.delete(0, END)
+        self.processedFolderEntry.insert(0, self.processedFolderPath)
 
+        self.started = Queue(1)
+        self.monitor_thread = None
 
-    def startpressed(self):
-        tkMessageBox.askyesno("Warning","Do you wish to Proceed? ")
+    def start_pressed(self):
+        if self.started.empty():
+            self.startButton["text"] = "Stop"
+            self.started.put(True)
+            self.monitor_thread = Thread(
+                target=monitor_hand, 
+                args=(
+                    self.started, 
+                    self.inputFolderPath, 
+                    self.processedFolderPath, 
+                    time.time(), 
+                    5)
+                )
+            self.monitor_thread.start()
+        else:
+            self.startButton["text"] = "Start"
+            self.started.get()
+            self.monitor_thread.join()
 
-    def browse1(self):
-        self._filename = tkFileDialog.askdirectory()
-        self.entry1.delete(0, END)
-        self.entry1.insert(0, self._filename)
+    def browse_input_folder(self):
+        self.inputFolderPath = tkFileDialog.askdirectory()
+        self.inputFolderEntry.delete(0, END)
+        self.inputFolderEntry.insert(0, self.inputFolderPath)
 
-    def browse2(self):
-        self._filename = tkFileDialog.askdirectory()
-        self.entry2.delete(0, END)
-        self.entry2.insert(0, self._filename)
+    def browse_processed_folder(self):
+        self.processedFolderPath = tkFileDialog.askdirectory()
+        self.processedFolderEntry.delete(0, END)
+        self.processedFolderEntry.insert(0, self.processedFolderPath)
 
-root = Tk()
-View(root)
-root.mainloop()
+def main():
+    root = Tk()
+    View(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()

@@ -1,1 +1,1 @@
-C:\Users\Simon\Desktop\pypy-2.2.1-win32\pypy.exe SealsConverter.py
+C:\Users\Simon\Desktop\pypy-2.2.1-win32\pypy.exe GUI.py

@@ -53,10 +53,10 @@ def walk_hands(input_folder, output_folder, processed_folder, batch_count):
         f.close()
         os.rename(full_path, processed_folder + "/" + filename)
 
-def monitor_hand(input_folder, output_folder, start_time, timeout):
+def monitor_hand(start_flag, input_folder, output_folder, start_time, timeout):
     tracking_files = set()
     file_lines = dict()
-    while True:
+    while not start_flag.empty():
         for (dirpath, dirnames, filenames) in os.walk(input_folder):
             # TODO: wanna recursively get into directories?
             for filename in filenames:
@@ -85,9 +85,10 @@ def monitor_hand(input_folder, output_folder, start_time, timeout):
         tracking_files = set()
         start_time = time.time()
         time.sleep(timeout)
-    pass
 
 def process_hand(hand_lines, output_folder, filename, part, file_mode):
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
     # print "\r\n".join(hand_lines)
     # print "\n"
     nc = NetworkConverter(hand_lines)
@@ -101,7 +102,6 @@ def process_hand(hand_lines, output_folder, filename, part, file_mode):
     fout.close()
     print fout_path + " written"
     # hh = HandHistory(hand_lines)
-    pass
 
 def main():
     input_folder = "C:/swc_client-Windows v0.2.18/handhistories"
