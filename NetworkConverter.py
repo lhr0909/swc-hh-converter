@@ -1,4 +1,4 @@
-import urllib, urllib2, time
+import urllib, urllib2, time, re
 
 class NetworkConverter:
     """
@@ -22,6 +22,7 @@ class NetworkConverter:
                     return False
                 else:
                     return True
+        return True
 
     def processHandHistory(self):
         url = "http://www.bitcoinpokerblog.com/handconverter/converthand.php"

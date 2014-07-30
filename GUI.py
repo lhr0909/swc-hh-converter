@@ -36,7 +36,7 @@ class View(object):
 
         # Initialization of various variables
         self.inputFolderPath = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/") + "/handhistories"
-        self.processedFolderPath = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/") + "/processed_handhistories"
+        self.processedFolderPath = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/") + "/converted_handhistories"
         self.inputFolderEntry.delete(0, END)
         self.inputFolderEntry.insert(0, self.inputFolderPath)
         self.processedFolderEntry.delete(0, END)
